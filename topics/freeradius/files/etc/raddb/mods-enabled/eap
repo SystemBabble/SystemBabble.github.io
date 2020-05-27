@@ -1,0 +1,59 @@
+
+eap {
+	default_eap_type = tls
+	timer_expire = 60
+	ignore_unknown_eap_types = no
+	cisco_accounting_username_bug = no
+	max_sessions = ${max_requests}
+
+	tls-config tls-common {
+		private_key_password = 22charactersecretpassw
+		private_key_file = ${certdir}/server.pem
+		certificate_file = ${certdir}/server.pem
+		ca_file = ${cadir}/ca_and_crl.pem
+		auto_chain = yes
+		dh_file = ${certdir}/dh
+		random_file = /dev/urandom
+		check_crl = yes
+		#allow_expired_crl = no
+		check_cert_issuer = "/C=CA/ST=Ontario/L=Toronto/O=sysramble/emailAddress=sysramble@example.com/CN=sysramble CA"
+		check_cert_cn = %{User-Name}
+
+		cipher_list = "HIGH"
+		cipher_server_preference = no
+		tls_min_version = "1.0"
+		#tls_max_version = "1.2"
+		ecdh_curve = "prime256v1"
+
+		cache {
+			enable = yes
+			lifetime = 24 # hours
+                        # these next two options are required since 3.0.14
+                        # OpenSSL internal session cache was disabled
+			name = "EAP module"
+                        # $ mkdir /var/log/radius/tlscache
+	                # $ chown _freeradius:wheel /var/log/radius/tlscache
+      	                # $ chmod 750 /var/log/radius/tlscache
+			persist_dir = "${logdir}/tlscache"
+		}
+		# this section is for ocsp checks
+		verify {
+		#	skip_if_ocsp_ok = no
+		#	tmpdir = /tmp/radiusd
+		#	client = "/path/to/openssl verify -CApath ${..ca_path} %{TLS-Client-Cert-Filename}"
+		}
+		ocsp {
+			enable = no
+		#	override_cert_url = yes
+		#	url = "http://127.0.0.1/ocsp/"
+		#	use_nonce = yes
+		#	timeout = 0
+		#	softfail = no
+		}
+	}
+	#  EAP-TLS
+	tls {
+		tls = tls-common
+		virtual_server = check-eap-tls
+	}
+}

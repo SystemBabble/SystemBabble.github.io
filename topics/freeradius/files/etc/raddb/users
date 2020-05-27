@@ -1,0 +1,9 @@
+# Users file with static VLAN assignment and a DEFAULT fallthrough vlan
+sysramble@example.com Nas-Port-Type == Wireless-802.11
+	Tunnel-Type = VLAN,
+	Tunnel-Medium-Type = IEEE-802,
+	Tunnel-Private-Group-ID = 4
+DEFAULT Nas-Port-Type == Wireless-802.11
+	Tunnel-Type = VLAN,
+	Tunnel-Medium-Type = IEEE-802,
+	Tunnel-Private-Group-ID = 3

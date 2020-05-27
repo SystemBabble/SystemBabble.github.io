@@ -1,0 +1,268 @@
+server default {
+listen {
+	#  Type of packets to listen for.
+	type = auth
+
+	ipaddr = 10.1.2.2
+
+	#  Port on which to listen.
+	#  Allowed values are:
+	#	integer port number (1812)
+	#	0 means "use /etc/services for the proper port"
+	port = 0
+
+	#
+	#  Connection limiting for sockets with "proto = tcp".
+	#
+	#  This section is ignored for other kinds of sockets.
+	#
+	limit {
+	      #
+	      #  Limit the number of simultaneous TCP connections to the socket
+	      #
+	      #  The default is 16.
+	      #  Setting this to 0 means "no limit"
+	      max_connections = 16
+
+	      #  The per-socket "max_requests" option does not exist.
+
+	      #
+	      #  The lifetime, in seconds, of a TCP connection.  After
+	      #  this lifetime, the connection will be closed.
+	      #
+	      #  Setting this to 0 means "forever".
+	      lifetime = 0
+
+	      #
+	      #  The idle timeout, in seconds, of a TCP connection.
+	      #  If no packets have been received over the connection for
+	      #  this time, the connection will be closed.
+	      #
+	      #  Setting this to 0 means "no timeout".
+	      #
+	      #  We STRONGLY RECOMMEND that you set an idle timeout.
+	      #
+	      idle_timeout = 30
+	}
+}
+
+listen {
+	ipaddr = 10.10.7.1
+	port = 0
+	type = acct
+
+	limit {
+	}
+}
+
+
+authorize {
+	#
+	#  Take a User-Name, and perform some checks on it, for spaces and other
+	#  invalid characters.  If the User-Name appears invalid, reject the
+	#  request.
+	#
+	#  See policy.d/filter for the definition of the filter_username policy.
+	#
+	filter_username
+
+	#
+	#  The preprocess module takes care of sanitizing some bizarre
+	#  attributes in the request, and turning them into attributes
+	#  which are more standard.
+	#
+	#  It takes care of processing the 'raddb/mods-config/preprocess/hints' 
+	#  and the 'raddb/mods-config/preprocess/huntgroups' files.
+	preprocess
+
+	#
+	#  If you are using multiple kinds of realms, you probably
+	#  want to set "ignore_null = yes" for all of them.
+	#  Otherwise, when the first style of realm doesn't match,
+	#  the other styles won't be checked.
+	#
+	suffix
+
+	eap {
+		ok = return
+	}
+
+	#
+	#  Read the 'users' file.  In v3, this is located in
+	#  raddb/mods-config/files/authorize
+	files
+
+	#
+	#  Look in an SQL database.  The schema of the database
+	#  is meant to mirror the "users" file.
+	#
+	#  See "Authorization Queries" in mods-available/sql
+	-sql
+
+	#
+	#  If you are using /etc/smbpasswd, and are also doing
+	#  mschap authentication, the un-comment this line, and
+	#  configure the 'smbpasswd' module.
+
+	#
+	#  The ldap module reads passwords from the LDAP database.
+	-ldap
+
+	#
+	#  Enforce daily limits on time spent logged in.
+
+	#
+	expiration
+	logintime
+
+	#
+	#  If no other module has claimed responsibility for
+	#  authentication, then try to use PAP.  This allows the
+	#  other modules listed above to add a "known good" password
+	#  to the request, and to do nothing else.  The PAP module
+	#  will then see that password, and use it to do PAP
+	#  authentication.
+	#
+	#  This module should be listed last, so that the other modules
+	#  get a chance to set Auth-Type for themselves.
+	#
+	#pap
+
+	#
+	#  If "status_server = yes", then Status-Server messages are passed
+	#  through the following section, and ONLY the following section.
+	#  This permits you to do DB queries, for example.  If the modules
+	#  listed here return "fail", then NO response is sent.
+	#
+}
+
+
+
+authenticate {
+	#
+	#  Allow EAP authentication.
+	eap
+}
+
+
+preacct {
+	preprocess
+
+	#
+	#  Ensure that we have a semi-unique identifier for every
+	#  request, and many NAS boxes are broken.
+	acct_unique
+
+	#
+	#  Look for IPASS-style 'realm/', and if not found, look for
+	#  '@realm', and decide whether or not to proxy, based on
+	#  that.
+	#
+	#  Accounting requests are generally proxied to the same
+	#  home server as authentication requests.
+	suffix
+
+	#
+	#  Read the 'acct_users' file
+	files
+}
+
+accounting {
+	#  Update accounting packet by adding the CUI attribute
+	#  recorded from the corresponding Access-Accept
+	#  use it only if your NAS boxes do not support CUI themselves
+	#
+	#  Create a 'detail'ed log of the packets.
+	#  Note that accounting requests which are proxied
+	#  are also logged in the detail file.
+	detail
+
+	#  Update the wtmp file
+	#
+	#  If you don't use "radlast", you can delete this line.
+	#unix
+
+	#
+	#  For Simultaneous-Use tracking.
+	#
+	#  Due to packet losses in the network, the data here
+	#  may be incorrect.  There is little we can do about it.
+
+	#  Return an address to the IP Pool when we see a stop record.
+
+	#
+	#  Log traffic to an SQL database.
+	#
+	#  See "Accounting queries" in mods-available/sql
+	-sql
+
+	# For Exec-Program and Exec-Program-Wait
+	exec
+
+	#  Filter attributes from the accounting response.
+	attr_filter.accounting_response
+
+	#  See "Autz-Type Status-Server" for how this works.
+	#
+}
+
+
+session {
+}
+
+
+post-auth {
+	#  If both session-state and reply contain a User-Name attribute, remove
+	#  the one in the reply if it is just a copy of the one in the request, so
+	#  we don't end up with two User-Name attributes.
+
+	if (session-state:User-Name && reply:User-Name && request:User-Name && (reply:User-Name == request:User-Name)) {
+		update reply {
+			&User-Name !* ANY
+		}
+	}
+	update {
+		&reply: += &session-state:
+	}
+
+	#
+	#  After authenticating the user, do another SQL query.
+	#
+	#  See "Authentication Logging Queries" in mods-available/sql
+	-sql
+
+	# For Exec-Program and Exec-Program-Wait
+	exec
+
+	#  Remove reply message if the response contains an EAP-Message
+	remove_reply_message_if_eap
+
+	Post-Auth-Type REJECT {
+		# log failed authentications in SQL, too.
+		-sql
+		attr_filter.access_reject
+
+		# Insert EAP-Failure message if the request was
+		# rejected by policy instead of because of an
+		# authentication failure
+		eap
+
+		#  Remove reply message if the response contains an EAP-Message
+		remove_reply_message_if_eap
+	}
+
+	#
+	#  Filter access challenges.
+	#
+	Post-Auth-Type Challenge {
+	}
+
+}
+
+pre-proxy {
+}
+
+post-proxy {
+	eap
+}
+}

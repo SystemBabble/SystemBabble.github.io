@@ -1,0 +1,30 @@
+
+
+server check-eap-tls {
+
+authorize {
+	#
+	# Check the client certificate common name against the supplied User-Name
+	#
+	if (&User-Name == &TLS-Client-Cert-Common-Name) {
+		update config {
+			&Auth-Type := Accept
+		}
+	}
+	else {
+		update config {
+			&Auth-Type := Reject
+		}
+	}
+	#
+	# Log all request attributes, plus TLS certificate details, to the
+	# auth_log file. Again, this is just once per connection request, so
+	# may be preferable than in the outer authorize section. It is
+	# suggested that 'auth_log' also be in the outer post-auth and
+	# Post-Auth REJECT sections to log reply packet details, too.
+	#
+	#auth_log
+
+}
+}
+
