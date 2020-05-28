@@ -46,6 +46,8 @@ Use at your own risk: [bin/targets/ath79/tiny/](https://github.com/SystemBabble/
 
 There are 2 main configuration files to worry about.
 
+#### Network
+
 [/etc/config/network](./files/etc/config/network)
 
 This file defines the network interface configuration.
@@ -109,37 +111,81 @@ config interface 'vlan4'
 
 ##### Switch configuration 
 
-Enable vlans
 
 ```
+# enable vlans
 config switch
         option name 'switch0'
         option reset '1'
         option enable_vlan '1'
-
 ```
 
 For each vlan, decide which ports are tagged and untagged.
 
 ```
+# vlan2 tagged on 1 2 4 and 0, and untagged on 3 
 config switch_vlan
         option device 'switch0'
         option vlan '2'
         option ports '1t 2t 3 4t 0t'
 
+# vlan3 tagged on 1 4 and 0
 config switch_vlan
         option device 'switch0'
         option vlan '3'
         option ports '1t 4t 0t'
 ```
 
-
+#### Wirless
 
 [/etc/config/wireless](./files/etc/config/wireless)
 
+The key used here authenticates the authenticator to the radius server and
+should be strong 22 character password. You can generate an appropriate
+128 bit key like this. `dd if=/dev/urandom bs=16 count=1 | base64 | sed -e "s/=//g"`
 
+Note: generating keys on embedded devices with low entropy might lead to
+predictable keys.
 
+```
+config wifi-device 'radio0'
+        option type 'mac80211'
+        option channel 'auto'
+        option hwmode '11g'
+        option path 'platform/qca953x_wmac'
+        option htmode 'HT20'
+        #option txpower '10'
+        option country 'CA'
+        option legacy_rates '0'
+        #option distance '25'
+        option disabled '0'
 
+config wifi-iface 'enterprise_radio0'
+        option device 'radio0'
+        option mode 'ap'
+        option ssid 'systembabble'
+        option encryption 'wpa2+aes'  # WPA2-802.1x
+        option server '10.1.2.2'  # FreeRADIUS server ip
+        option port '1812'
+        option key 'lJAMZ5qavNSLuyt4UF5wwg'  # should be 22 chars of random
+        # helps protect against KRACK
+        option wpa_disable_eapol_key_retries '1'
+        # pmksa key caching
+        option auth_cache '1'
+        # protected management frames
+        #option ieee80211w '1'  # this can cause problems with older iPhones
+        # prohibit tunneled direct link setup
+        option tdls_probibit '1'
+        # 0 disabled / 1 enabled / 2 VLAN tunnel attribute mandatory
+        option dynamic_vlan '2'
+        option vlan_tagged_interface 'eth0'
+        option vlan_bridge 'br-vlan'
+        # 0 is vlan1 vlan2 / 1 is eth0.1 eth0.2
+        option vlan_naming '0'
+```
+
+At this point if you have the RADIUS server set up you should be ready to start
+authenticating clients!
 
 *Note about ssh*
 

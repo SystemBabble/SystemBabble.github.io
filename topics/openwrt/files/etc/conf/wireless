@@ -15,12 +15,20 @@ config wifi-iface 'enterprise_radio0'
 	option mode 'ap'
 	option ssid 'systembabble' 
 	option encryption 'wpa2+aes'  # WPA2-802.1x
-	option server '10.1.2.2'  # this is the FreeRADIUS server ip
+	option server '10.1.2.2'  # FreeRADIUS server ip
 	option port '1812'
 	option key 'lJAMZ5qavNSLuyt4UF5wwg'  # should be 22 chars of random
-	option wpa_disable_eapol_key_retries '1'  # helps protect against KRACK
-	option ieee80211w '1'  # this can cause problems with older iPhones
-	option dynamic_vlan '2'  # 0 disabled / 1 enabled / 2 VLAN tunnel attribute mandatory
+	# helps protect against KRACK
+	option wpa_disable_eapol_key_retries '1'
+	# pmksa key caching
+        option auth_cache '1'
+	# protected management frames
+	#option ieee80211w '1'  # this can cause problems with older iPhones
+	# prohibit tunneled direct link setup
+	option tdls_probibit '1'
+	# 0 disabled / 1 enabled / 2 VLAN tunnel attribute mandatory
+	option dynamic_vlan '2'
 	option vlan_tagged_interface 'eth0'
 	option vlan_bridge 'br-vlan'
-	option vlan_naming '0'  # 0 is vlan1 vlan2 / 1 is eth0.1 eth0.2
+	# 0 is vlan1 vlan2 / 1 is eth0.1 eth0.2
+	option vlan_naming '0'
