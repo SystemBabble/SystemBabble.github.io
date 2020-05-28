@@ -1,5 +1,5 @@
 ### Topics
 
 #### 802.1x
-[OpenBSD FreeRADIUS](./topics/freeradius/)
-[OpenWrt Authenticator](./topics/openwrt/)
+* [OpenBSD FreeRADIUS](./topics/freeradius/)
+* [OpenWrt Authenticator](./topics/openwrt/)

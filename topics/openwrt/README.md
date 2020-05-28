@@ -24,7 +24,7 @@ install wpad. Building your own firmware image is required.
 
 ### Firmware
 
-https://openwrt.org/docs/guide-user/additional-software/saving_space
+[https://openwrt.org/docs/guide-user/additional-software/saving_space](https://openwrt.org/docs/guide-user/additional-software/saving_space)
 
 In short run `make menuconfig` remove the 
 `ppp, iptables, odhcp, opkg, hostapd-mini` packages and add `wpad-openssl`
@@ -37,17 +37,16 @@ Prebuilt images for v19.07.02 are below.
 * [tplink_tl-wr841-v11](https://openwrt.org/toh/hwdata/tp-link/tp-link_tl-wr841n_v11)
 * [ath79-tiny target](https://openwrt.org/docs/techref/targets/ath79)
 * No LuCi only Dropbear
-* No iptables
-* No opkg
-* wpad-openssl
+* No iptables, ppp or opkg
+* Full wpad-openssl
 
 Use at your own risk: [bin/targets/ath79/tiny/](./files/tiny/)
 
 
 *Note about ssh*
 
-https://dev.archive.openwrt.org/ticket/15209
-https://forum.archive.openwrt.org/viewtopic.php?id=70368&p=1#p355173
+[https://dev.archive.openwrt.org/ticket/15209]([https://dev.archive.openwrt.org/ticket/15209])
+[https://forum.archive.openwrt.org/viewtopic.php?id=70368&p=1#p355173](https://forum.archive.openwrt.org/viewtopic.php?id=70368&p=1#p355173)
 
 Dropbear has an odd bug on MIPS16 where it hangs when you try and ssh into a
 device. Just Ctrl+C and try 4 times and it will work on the 3rd or 4th attempt.
