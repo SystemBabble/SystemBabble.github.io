@@ -19,10 +19,10 @@ Image by [Felix Bauer](https://commons.wikimedia.org/wiki/File:802-1X.png) / [CC
 See https://sysramble.github.io/topics/freeradius for FreeRADIUS configuration,
 if you need an authentication server.
 
+### Firmware
+
 Because of space constraints on the TL-WR841N, there is no space for opkg to
 install wpad. Building your own firmware image is required.
-
-### Firmware
 
 [https://openwrt.org/docs/guide-user/additional-software/saving_space](https://openwrt.org/docs/guide-user/additional-software/saving_space)
 
@@ -33,6 +33,8 @@ Don't add the LuCI GUI and instead use ssh to configure the device.
 
 Prebuilt images for v19.07.02 are below.
 
+Use at your own risk: [bin/targets/ath79/tiny/](https://github.com/SystemBabble/SystemBabble.github.io/tree/master/topics/openwrt/files/tiny)
+
 * [OpenWrt v19.07.02](https://openwrt.org/releases/19.07/changelog-19.07.2)
 * [tplink_tl-wr841-v11](https://openwrt.org/toh/hwdata/tp-link/tp-link_tl-wr841n_v11)
 * [ath79-tiny target](https://openwrt.org/docs/techref/targets/ath79)
@@ -40,11 +42,9 @@ Prebuilt images for v19.07.02 are below.
 * No iptables, ppp or opkg
 * Full wpad-openssl
 
-Use at your own risk: [bin/targets/ath79/tiny/](https://github.com/SystemBabble/SystemBabble.github.io/tree/master/topics/openwrt/files/tiny)
-
 ### Configuration
 
-There are 2 main configuration files to worry about.
+There are two main configuration areas to worry about. `network` and `wireless`
 
 #### Network
 
@@ -142,7 +142,9 @@ config switch_vlan
 
 The key used here authenticates the authenticator to the radius server and
 should be strong 22 character password. You can generate an appropriate
-128 bit key like this. `dd if=/dev/urandom bs=16 count=1 | base64 | sed -e "s/=//g"`
+128 bit key like this.
+
+`dd if=/dev/urandom bs=16 count=1 | base64 | sed -e "s/=//g"`
 
 Note: generating keys on embedded devices with low entropy might lead to
 predictable keys.
