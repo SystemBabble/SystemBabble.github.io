@@ -40,7 +40,7 @@ Prebuilt images for v19.07.02 are below.
 * No iptables, ppp or opkg
 * Full wpad-openssl
 
-Use at your own risk: [bin/targets/ath79/tiny/](./files/tiny/)
+Use at your own risk: [bin/targets/ath79/tiny/](https://github.com/SystemBabble/SystemBabble.github.io/tree/master/topics/openwrt/files/tiny)
 
 
 *Note about ssh*
