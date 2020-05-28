@@ -1,0 +1,66 @@
+
+config interface 'loopback'
+	option ifname 'lo'
+	option proto 'static'
+	option ipaddr '127.0.0.1'
+	option netmask '255.0.0.0'
+
+config globals 'globals'
+	option ula_prefix 'fde0:a60a:51db::/48'
+
+# administrative vlan
+config interface 'vlan2'
+	option type 'bridge'
+	option ifname 'eth0.2'
+	option proto 'static'
+	option ipaddr '10.1.2.2'
+	option netmask '255.255.255.0'
+	option stp '1'
+	option igmp_snooping '1'
+
+# default route to admin vlan
+config 'route'
+	option 'interface' 'vlan2'
+	option 'target' '0.0.0.0'
+	option 'netmask' '0.0.0.0'
+	option 'gateway' '10.1.2.1'
+	option 'metric' 0
+
+config interface 'vlan3'
+	option type 'bridge'
+	option ifname 'eth0.3'
+	option proto 'static'
+	option ipaddr '10.1.3.2'
+	option netmask '255.255.255.0'
+	option stp '1'
+	option igmp_snooping '1'
+
+config interface 'vlan4'
+	option type 'bridge'
+	option ifname 'eth0.4'
+	option proto 'static'
+	option ipaddr '10.1.4.2'
+	option netmask '255.255.255.248'
+	option stp '1'
+	option igmp_snooping '1'
+
+config switch
+	option name 'switch0'
+	option reset '1'
+	option enable_vlan '1'
+
+# admin vlan is untagged on port 3 
+config switch_vlan
+	option device 'switch0'
+	option vlan '2'
+	option ports '1t 2t 3 4t 0t'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '3'
+	option ports '1t 4t 0t'
+
+config switch_vlan
+	option device 'switch0'
+	option vlan '4'
+	option ports '1t 4t 0t'
